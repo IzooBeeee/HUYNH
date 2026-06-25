@@ -40,13 +40,36 @@ kill_instance() {
     fi
 }
 
+count_running() {
+    local count=0
+    for p in 8001 8002 8003; do
+        local pid_file="$PID_DIR/laravel_${p}.pid"
+        if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+            count=$((count + 1))
+        elif lsof -Pi ":$p" -sTCP:LISTEN -t &>/dev/null; then
+            count=$((count + 1))
+        fi
+    done
+    echo "$count"
+}
+
 if [ -n "${1:-}" ]; then
     # Tắt 1 instance cụ thể (demo failover)
     port="$1"
+    running=$(count_running)
+
+    if [ "$running" -le 1 ]; then
+        echo -e "${RED}❌ Không thể tắt port $port — đây là server CUỐI CÙNG đang chạy!${NC}"
+        echo -e "${YELLOW}   Dashboard http://localhost:8080/dashboard sẽ bị rớt nếu tắt.${NC}"
+        echo -e "${YELLOW}   Hãy khởi động lại server khác trước: bash scripts/restart_one.sh <port>${NC}"
+        exit 1
+    fi
+
     echo -e "${BLUE}Tắt instance port $port để demo failover...${NC}"
     kill_instance "$port"
     echo ""
-    echo -e "${YELLOW}Nginx sẽ tự động chuyển traffic sang 2 instance còn lại.${NC}"
+    remaining=$((running - 1))
+    echo -e "${YELLOW}Nginx sẽ tự động chuyển traffic sang $remaining instance còn lại.${NC}"
     echo -e "${YELLOW}Khởi động lại: bash scripts/restart_one.sh $port${NC}"
 else
     # Tắt tất cả

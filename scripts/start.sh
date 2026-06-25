@@ -94,7 +94,7 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}Hệ thống đã khởi động!${NC}"
 echo -e "${GREEN}══════════════════════════════════════${NC}"
 echo ""
-echo "  Demo:        http://localhost:8080/demo (qua Nginx)"
+echo "  Demo:        http://localhost:8080/dashboard (qua Nginx)"
 echo "  Trực tiếp:   http://localhost:8001 | :8002 | :8003"
 echo ""
 echo -e "${YELLOW}Dừng hệ thống: bash scripts/stop.sh${NC}"
